@@ -17,6 +17,9 @@ import {
   Compass,
   AlertTriangle,
   Star,
+  MapPin,
+  Globe,
+  Settings,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -71,21 +74,18 @@ export default function AdminDashboard() {
 
     const loadAdminData = async () => {
       try {
-        // Fetch all colleges
         const colRes = await fetch("/api/colleges?limit=100");
         if (colRes.ok) {
           const data = await colRes.json();
           setColleges(data.colleges);
         }
 
-        // Fetch all reviews for moderation
         const revRes = await fetch("/api/reviews");
         if (revRes.ok) {
           const data = await revRes.json();
           setReviews(data);
         }
 
-        // Fetch all users list
         const usrRes = await fetch("/api/admin/users");
         if (usrRes.ok) {
           const data = await usrRes.json();
@@ -111,7 +111,6 @@ export default function AdminDashboard() {
 
     setSubmittingCollege(true);
 
-    // Format courses and facilities from comma separated text
     const parsedCourses = coursesInput
       .split(",")
       .map((c) => c.trim())
@@ -154,7 +153,6 @@ export default function AdminDashboard() {
 
     try {
       if (editingCollegeId) {
-        // Edit Mode
         const res = await fetch(`/api/colleges/${editingCollegeId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -173,7 +171,6 @@ export default function AdminDashboard() {
           toast.error("Failed to update college details");
         }
       } else {
-        // Add Mode
         const res = await fetch("/api/colleges", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -245,7 +242,6 @@ export default function AdminDashboard() {
     setCoursesInput(c.courses.map((course: any) => course.name).join(", "));
     setFacilitiesInput(c.facilities.map((fac: any) => fac.name).join(", "));
 
-    // Scroll to form
     document.getElementById("college-form-container")?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -305,9 +301,9 @@ export default function AdminDashboard() {
 
   if (authLoading || loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16 flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
-        <p className="font-semibold text-slate-450">Loading administrative dashboards...</p>
+      <div className="max-w-7xl mx-auto px-4 py-20 flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <p className="font-semibold text-slate-450">Loading administrative panels...</p>
       </div>
     );
   }
@@ -315,26 +311,26 @@ export default function AdminDashboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       
-      {/* Header Banner */}
+      {/* Banner */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-extrabold text-slate-850 dark:text-slate-100 flex items-center">
-          <ShieldAlert className="w-7.5 h-7.5 mr-2.5 text-rose-500" />
+        <h1 className="text-3xl font-extrabold text-slate-850 dark:text-white flex items-center">
+          <ShieldAlert className="w-7.5 h-7.5 mr-2.5 text-accent-red" />
           System Administration
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm">
-          Manage database records, review admissions listings, and moderate student review boards.
+        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
+          Manage database records, review admissions listings, and moderate review boards.
         </p>
       </div>
 
-      {/* Admin Tab buttons */}
-      <div className="flex border-b border-slate-200 dark:border-slate-850 gap-4 overflow-x-auto">
+      {/* Tabs list */}
+      <div className="flex border-b border-slate-200 dark:border-slate-850 gap-4 overflow-x-auto no-scrollbar">
         {(["overview", "colleges", "reviews", "users"] as Tab[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`py-3 px-1 border-b-2 font-bold text-sm uppercase tracking-wider transition-all whitespace-nowrap ${
+            className={`py-3 px-1 border-b-2 font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
               activeTab === tab
-                ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
+                ? "border-primary text-primary"
                 : "border-transparent text-slate-450 hover:text-slate-700"
             }`}
           >
@@ -343,51 +339,50 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Tab Contents */}
-      <div className="space-y-8 animate-in fade-in duration-200">
+      {/* Contents */}
+      <div className="space-y-8">
         
-        {/* Tab 1: Overview */}
+        {/* Overview Tab */}
         {activeTab === "overview" && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-in fade-in duration-200">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex items-center space-x-4">
-                <div className="p-3 bg-blue-50 dark:bg-blue-950/30 text-blue-500 rounded-xl">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-900 p-6 rounded-2xl flex items-center space-x-4">
+                <div className="p-3 bg-primary/10 text-primary border border-primary/20 rounded-xl">
                   <Compass className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-3xl font-black text-slate-800 dark:text-slate-100">{colleges.length}</p>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Colleges</p>
+                  <p className="text-2xl font-black text-slate-800 dark:text-white leading-none">{colleges.length}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1.5">Registered Colleges</p>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex items-center space-x-4">
-                <div className="p-3 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-500 rounded-xl">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-900 p-6 rounded-2xl flex items-center space-x-4">
+                <div className="p-3 bg-accent-purple/10 text-accent-purple border border-accent-purple/20 rounded-xl">
                   <MessageSquare className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-3xl font-black text-slate-800 dark:text-slate-100">{reviews.length}</p>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Reviews</p>
+                  <p className="text-2xl font-black text-slate-800 dark:text-white leading-none">{reviews.length}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1.5">Total Reviews</p>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex items-center space-x-4">
-                <div className="p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-500 rounded-xl">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-900 p-6 rounded-2xl flex items-center space-x-4">
+                <div className="p-3 bg-accent-green/10 text-accent-green border border-accent-green/20 rounded-xl">
                   <Users className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-3xl font-black text-slate-800 dark:text-slate-100">{users.length}</p>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Accounts</p>
+                  <p className="text-2xl font-black text-slate-800 dark:text-white leading-none">{users.length}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1.5">User Accounts</p>
                 </div>
               </div>
 
             </div>
 
-            {/* Quick action info */}
-            <div className="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 text-sm text-slate-600 dark:text-slate-350">
-              <h3 className="font-bold mb-2 flex items-center text-slate-800 dark:text-slate-200">
-                <AlertTriangle className="w-4 h-4 mr-2 text-rose-500" />
-                Administrative Guidelines
+            <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-855 text-xs font-semibold text-slate-550 dark:text-slate-350">
+              <h3 className="font-extrabold mb-2.5 flex items-center text-slate-850 dark:text-white uppercase tracking-wider">
+                <AlertTriangle className="w-4.5 h-4.5 mr-2 text-accent-red" />
+                Administrative Scope
               </h3>
               <p className="leading-relaxed">
                 As an administrator, you have complete control over college lists and student reviews. Any deletion is immediate and cascades across the database (associated courses, hostel stats, and reviews will be removed). Be cautious when deleting active colleges.
@@ -396,51 +391,51 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Tab 2: Manage Colleges */}
+        {/* Manage Colleges Tab */}
         {activeTab === "colleges" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start animate-in fade-in duration-200">
             
-            {/* Form Column (1 column) */}
+            {/* Left form (1 column) */}
             <div
               id="college-form-container"
-              className="lg:col-span-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm space-y-4 scroll-mt-20 transition-colors"
+              className="lg:col-span-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-900 p-6 rounded-3xl shadow-sm space-y-4 scroll-mt-20 text-xs font-semibold"
             >
-              <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm border-b border-slate-150 dark:border-slate-800 pb-2">
-                {editingCollegeId ? "Edit College Profile" : "Add New College Profile"}
+              <h3 className="font-bold text-slate-850 dark:text-white text-xs uppercase tracking-wider border-b border-slate-100 dark:border-slate-850 pb-2 flex items-center">
+                <Settings className="w-4.5 h-4.5 mr-1.5 text-primary" />
+                {editingCollegeId ? "Edit Profile" : "Create Profile"}
               </h3>
 
-              <form onSubmit={handleCreateOrUpdateCollege} className="space-y-4 text-xs font-semibold">
-                
+              <form onSubmit={handleCreateOrUpdateCollege} className="space-y-4 font-semibold">
                 {/* Name */}
-                <div className="space-y-1">
-                  <label className="text-slate-400 uppercase tracking-wide">College Name *</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-slate-400 uppercase tracking-widest">College Name *</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Govt Engineering College"
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800 dark:text-white"
+                    placeholder="Govt Engineering College"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary text-slate-800 dark:text-slate-200 focus:outline-none"
                   />
                 </div>
 
                 {/* Location & District */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-slate-400 uppercase tracking-wide">City/Location *</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-slate-400 uppercase tracking-widest">City *</label>
                     <input
                       type="text"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                       placeholder="e.g. Sreekaryam"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800 dark:text-white"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary text-slate-800 dark:text-slate-200 focus:outline-none"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-slate-400 uppercase tracking-wide">District *</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-slate-400 uppercase tracking-widest">District *</label>
                     <select
                       value={district}
                       onChange={(e) => setDistrict(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800 dark:text-white"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-250 cursor-pointer"
                     >
                       {["Trivandrum", "Kollam", "Ernakulam", "Thrissur", "Palakkad"].map((d) => (
                         <option key={d} value={d}>{d}</option>
@@ -451,22 +446,22 @@ export default function AdminDashboard() {
 
                 {/* Fees & Type */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-slate-400 uppercase tracking-wide">Annual Fees (INR) *</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-slate-400 uppercase tracking-widest">Annual Fees *</label>
                     <input
                       type="text"
                       value={fees}
                       onChange={(e) => setFees(e.target.value.replace(/\D/g, ""))}
                       placeholder="e.g. 35000"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800 dark:text-white"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-855 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary text-slate-800 dark:text-slate-200 focus:outline-none"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-slate-400 uppercase tracking-wide">Type *</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-slate-400 uppercase tracking-widest">Type *</label>
                     <select
                       value={type}
                       onChange={(e) => setType(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800 dark:text-white"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-855 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-250 cursor-pointer"
                     >
                       <option value="Government">Government</option>
                       <option value="Government-Aided">Government-Aided</option>
@@ -475,206 +470,139 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Placements & Avg Package */}
+                {/* Placements metrics */}
                 <div className="grid grid-cols-3 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-slate-450 uppercase tracking-wider">Placements %</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] text-slate-450 uppercase tracking-wider">Placement %</label>
                     <input
                       type="text"
                       value={placementPercentage}
                       onChange={(e) => setPlacementPercentage(e.target.value)}
-                      placeholder="e.g. 90"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800 dark:text-white"
+                      placeholder="90"
+                      className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-855 border rounded-lg focus:ring-2 focus:ring-primary text-slate-800 dark:text-slate-200 focus:outline-none"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-slate-455 uppercase tracking-wider">Avg LPA</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] text-slate-455 uppercase tracking-wider">Avg LPA</label>
                     <input
                       type="text"
                       value={averagePackage}
                       onChange={(e) => setAveragePackage(e.target.value)}
-                      placeholder="e.g. 5.5"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800 dark:text-white"
+                      placeholder="5.5"
+                      className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-855 border rounded-lg focus:ring-2 focus:ring-primary text-slate-800 dark:text-slate-200 focus:outline-none"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-slate-455 uppercase tracking-wider">Highest LPA</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] text-slate-455 uppercase tracking-wider">Highest LPA</label>
                     <input
                       type="text"
                       value={highestPackage}
                       onChange={(e) => setHighestPackage(e.target.value)}
-                      placeholder="e.g. 18"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800 dark:text-white"
+                      placeholder="18"
+                      className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-855 border rounded-lg focus:ring-2 focus:ring-primary text-slate-800 dark:text-slate-200 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Coordinates */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-slate-400 uppercase tracking-widest">Latitude</label>
+                    <input
+                      type="text"
+                      value={latitude}
+                      onChange={(e) => setLatitude(e.target.value)}
+                      placeholder="8.5444"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-855 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-slate-400 uppercase tracking-widest">Longitude</label>
+                    <input
+                      type="text"
+                      value={longitude}
+                      onChange={(e) => setLongitude(e.target.value)}
+                      placeholder="76.9054"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-855 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200"
                     />
                   </div>
                 </div>
 
                 {/* Description */}
-                <div className="space-y-1">
-                  <label className="text-slate-400 uppercase tracking-wide">Description *</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-slate-400 uppercase tracking-widest">Description *</label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Provide description of college achievements..."
+                    placeholder="Provide details about campus highlights..."
                     rows={3}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-850 dark:text-white resize-none"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-855 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-850 dark:text-slate-200 focus:ring-2 focus:ring-primary focus:outline-none resize-none"
                   />
                 </div>
 
-                {/* Coordinates */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-slate-400 uppercase tracking-wide">Latitude</label>
-                    <input
-                      type="text"
-                      value={latitude}
-                      onChange={(e) => setLatitude(e.target.value)}
-                      placeholder="e.g. 8.5444"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800 dark:text-white"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-slate-400 uppercase tracking-wide">Longitude</label>
-                    <input
-                      type="text"
-                      value={longitude}
-                      onChange={(e) => setLongitude(e.target.value)}
-                      placeholder="e.g. 76.9054"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800 dark:text-white"
-                    />
-                  </div>
-                </div>
-
-                {/* Transport Hubs */}
-                <div className="space-y-1">
-                  <label className="text-slate-400 uppercase tracking-wide">Nearby Transport Stations</label>
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      value={nearbyBusStand}
-                      onChange={(e) => setNearbyBusStand(e.target.value)}
-                      placeholder="Bus: e.g. Sreekaryam Bus Stand (1km)"
-                      className="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border rounded-lg text-slate-800 dark:text-white text-xs"
-                    />
-                    <input
-                      type="text"
-                      value={nearbyRailway}
-                      onChange={(e) => setNearbyRailway(e.target.value)}
-                      placeholder="Railway: e.g. Trivandrum Central (10km)"
-                      className="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border rounded-lg text-slate-800 dark:text-white text-xs"
-                    />
-                    <input
-                      type="text"
-                      value={nearbyAirport}
-                      onChange={(e) => setNearbyAirport(e.target.value)}
-                      placeholder="Airport: e.g. Trivandrum Intl (12km)"
-                      className="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border rounded-lg text-slate-800 dark:text-white text-xs"
-                    />
-                  </div>
-                </div>
-
-                {/* Comma Sep Lists */}
+                {/* Website & Photo */}
                 <div className="space-y-2">
-                  <div className="space-y-1">
-                    <label className="text-slate-400 uppercase tracking-wide">Branches Offered (Comma-separated)</label>
-                    <input
-                      type="text"
-                      value={coursesInput}
-                      onChange={(e) => setCoursesInput(e.target.value)}
-                      placeholder="e.g. Computer Science & Engineering, Mechanical Engineering"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-slate-800 dark:text-white"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-slate-400 uppercase tracking-wide">Facilities Offered (Comma-separated)</label>
-                    <input
-                      type="text"
-                      value={facilitiesInput}
-                      onChange={(e) => setFacilitiesInput(e.target.value)}
-                      placeholder="e.g. Library, Wifi, Research Labs, Gym"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-slate-800 dark:text-white"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                    placeholder="Website: https://www.cet.ac.in"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-855 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200"
+                  />
+                  <input
+                    type="text"
+                    value={image}
+                    onChange={(e) => setImage(e.target.value)}
+                    placeholder="Campus Photo URL..."
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-855 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200"
+                  />
                 </div>
 
-                {/* Extra Metadata Inputs */}
-                <div className="space-y-2">
-                  <div className="space-y-1">
-                    <label className="text-slate-400 uppercase tracking-wide">College Website</label>
-                    <input
-                      type="text"
-                      value={website}
-                      onChange={(e) => setWebsite(e.target.value)}
-                      placeholder="e.g. https://www.cet.ac.in"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-slate-850 dark:text-white"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-slate-400 uppercase tracking-wide">Campus Photo URL</label>
-                    <input
-                      type="text"
-                      value={image}
-                      onChange={(e) => setImage(e.target.value)}
-                      placeholder="Paste online image link here..."
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-slate-850 dark:text-white"
-                    />
-                  </div>
-                </div>
-
-                {/* Checkboxes */}
-                <div className="flex flex-wrap gap-4 py-2">
-                  <label className="flex items-center space-x-2 text-slate-700 dark:text-slate-350 cursor-pointer">
+                {/* Infrastructure checklist */}
+                <div className="flex flex-wrap gap-4 py-1.5 text-slate-700 dark:text-slate-350">
+                  <label className="flex items-center space-x-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={autonomous}
                       onChange={(e) => setAutonomous(e.target.checked)}
-                      className="w-4 h-4 rounded text-blue-600"
+                      className="w-4 h-4 rounded border-slate-300 text-primary"
                     />
                     <span>Autonomous</span>
                   </label>
-                  <label className="flex items-center space-x-2 text-slate-700 dark:text-slate-350 cursor-pointer">
+                  <label className="flex items-center space-x-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={hostel}
                       onChange={(e) => setHostel(e.target.checked)}
-                      className="w-4 h-4 rounded text-blue-600"
+                      className="w-4 h-4 rounded border-slate-300 text-primary"
                     />
-                    <span>Hostel Available</span>
+                    <span>Hostel</span>
                   </label>
-                  <label className="flex items-center space-x-2 text-slate-700 dark:text-slate-350 cursor-pointer">
+                  <label className="flex items-center space-x-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={transport}
                       onChange={(e) => setTransport(e.target.checked)}
-                      className="w-4 h-4 rounded text-blue-600"
+                      className="w-4 h-4 rounded border-slate-300 text-primary"
                     />
-                    <span>Transport Available</span>
+                    <span>Transport</span>
                   </label>
                 </div>
 
-                {/* Submission */}
-                <div className="flex gap-2 pt-2">
+                {/* Submits */}
+                <div className="flex gap-2.5 pt-2">
                   <button
                     type="submit"
                     disabled={submittingCollege}
-                    className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-450 text-white font-bold rounded-xl active:scale-95 transition-all flex items-center justify-center text-xs"
+                    className="flex-grow py-2.5 bg-primary hover:bg-primary-hover disabled:bg-primary/50 text-white font-bold rounded-xl active:scale-95 transition-all text-xs uppercase tracking-widest cursor-pointer"
                   >
-                    {submittingCollege ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                        Submitting...
-                      </>
-                    ) : editingCollegeId ? (
-                      "Save College Details"
-                    ) : (
-                      "Create College Profile"
-                    )}
+                    {submittingCollege ? "Submitting..." : editingCollegeId ? "Save Profile" : "Create Profile"}
                   </button>
                   {editingCollegeId && (
                     <button
                       type="button"
                       onClick={resetForm}
-                      className="px-4 py-2.5 border border-slate-200 dark:border-slate-800 text-slate-500 rounded-xl hover:bg-slate-100"
+                      className="px-4 py-2.5 border border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-50 rounded-xl cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -684,45 +612,45 @@ export default function AdminDashboard() {
               </form>
             </div>
 
-            {/* List Column (2 Columns) */}
+            {/* Right list (2 columns) */}
             <div className="lg:col-span-2 space-y-4">
-              <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg border-b border-slate-200 dark:border-slate-800 pb-3">
-                Registered College Profiles ({colleges.length})
+              <h3 className="font-bold text-slate-855 dark:text-white text-base border-b border-slate-200 dark:border-slate-900 pb-3">
+                Campuses Directory ({colleges.length})
               </h3>
 
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm transition-colors duration-300">
+              <div className="border border-slate-200 dark:border-slate-900 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm transition-colors duration-300">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <table className="w-full text-left text-xs font-semibold">
+                    <thead className="bg-slate-50 dark:bg-slate-850/50 border-b border-slate-200 dark:border-slate-855 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                       <tr>
-                        <th className="px-6 py-3">College</th>
+                        <th className="px-6 py-3">College Name</th>
                         <th className="px-6 py-3">District</th>
                         <th className="px-6 py-3">Type</th>
-                        <th className="px-6 py-3">Fees</th>
+                        <th className="px-6 py-3">Annual Fees</th>
                         <th className="px-6 py-3 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-150 dark:divide-slate-855 text-slate-700 dark:text-slate-300">
+                    <tbody className="divide-y divide-slate-150 dark:divide-slate-855 text-slate-700 dark:text-slate-350">
                       {colleges.map((c) => (
-                        <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                        <tr key={c.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/10">
                           <td className="px-6 py-4 font-bold max-w-[200px] truncate">{c.name}</td>
                           <td className="px-6 py-4">{c.district}</td>
-                          <td className="px-6 py-4 text-xs font-semibold">{c.type}</td>
+                          <td className="px-6 py-4">{c.type}</td>
                           <td className="px-6 py-4">₹{c.fees.toLocaleString()}/yr</td>
-                          <td className="px-6 py-4 text-right flex items-center justify-end space-x-2.5">
+                          <td className="px-6 py-4 text-right flex items-center justify-end space-x-2">
                             <button
                               onClick={() => handleStartEdit(c)}
-                              className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-colors"
+                              className="p-1.5 text-primary hover:bg-primary/5 rounded-lg transition-colors cursor-pointer"
                               title="Edit college"
                             >
-                              <Edit2 className="w-4.5 h-4.5" />
+                              <Edit2 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDeleteCollege(c.id)}
-                              className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
+                              className="p-1.5 text-accent-red hover:bg-accent-red/5 rounded-lg transition-colors cursor-pointer"
                               title="Delete college"
                             >
-                              <Trash2 className="w-4.5 h-4.5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </td>
                         </tr>
@@ -736,18 +664,18 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Tab 3: Moderate Reviews */}
+        {/* Moderate Reviews Tab */}
         {activeTab === "reviews" && (
-          <div className="space-y-4">
-            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg border-b border-slate-200 dark:border-slate-800 pb-3">
-              Review Moderation Center ({reviews.length})
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <h3 className="font-bold text-slate-855 dark:text-white text-base border-b border-slate-205 dark:border-slate-850 pb-3">
+              Submitted Review Board ({reviews.length})
             </h3>
 
             {reviews.length > 0 ? (
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm transition-colors duration-300">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-500 uppercase tracking-wider">
+              <div className="border border-slate-200/80 dark:border-slate-900 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm transition-colors duration-300">
+                <div className="overflow-x-auto animate-in fade-in">
+                  <table className="w-full text-left text-xs font-semibold">
+                    <thead className="bg-slate-50 dark:bg-slate-850/50 border-b border-slate-200 dark:border-slate-855 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                       <tr>
                         <th className="px-6 py-3">College</th>
                         <th className="px-6 py-3">User</th>
@@ -757,18 +685,18 @@ export default function AdminDashboard() {
                         <th className="px-6 py-3 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-150 dark:divide-slate-855 text-slate-750 dark:text-slate-350">
+                    <tbody className="divide-y divide-slate-150 dark:divide-slate-855 text-slate-700 dark:text-slate-350">
                       {reviews.map((r) => (
-                        <tr key={r.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                        <tr key={r.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/10">
                           <td className="px-6 py-4 font-bold max-w-[150px] truncate">{r.college.name}</td>
                           <td className="px-6 py-4">
-                            <p className="font-semibold">{r.user.name}</p>
-                            <p className="text-[10px] text-slate-400">{r.user.email}</p>
+                            <p className="font-bold">{r.user.name}</p>
+                            <p className="text-[10px] text-slate-400 font-medium">{r.user.email}</p>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex items-center text-amber-500">
+                            <div className="flex items-center text-accent-yellow">
                               <Star className="w-3.5 h-3.5 fill-current" />
-                              <span className="ml-1 font-bold">{r.rating}</span>
+                              <span className="ml-1 font-extrabold text-slate-800 dark:text-slate-200">{r.rating}</span>
                             </div>
                           </td>
                           <td className="px-6 py-4 max-w-sm truncate" title={r.comment}>
@@ -776,10 +704,10 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-6 py-4">
                             <span
-                              className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded border ${
+                              className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border ${
                                 r.approved
-                                  ? "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/20"
-                                  : "bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/20"
+                                  ? "bg-accent-green/10 text-accent-green border-accent-green/20"
+                                  : "bg-accent-yellow/10 text-accent-yellow border-accent-yellow/20"
                               }`}
                             >
                               {r.approved ? "Approved" : "Pending"}
@@ -788,18 +716,18 @@ export default function AdminDashboard() {
                           <td className="px-6 py-4 text-right flex items-center justify-end space-x-2">
                             <button
                               onClick={() => handleToggleReviewApproval(r.id, r.approved)}
-                              className={`p-1.5 rounded-lg border transition-colors ${
+                              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
                                 r.approved
-                                  ? "border-amber-200 text-amber-500 hover:bg-amber-50 dark:border-amber-900/30"
-                                  : "border-emerald-250 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-900/30"
+                                  ? "border-accent-yellow/30 text-accent-yellow hover:bg-accent-yellow/5"
+                                  : "border-accent-green/30 text-accent-green hover:bg-accent-green/5"
                               }`}
-                              title={r.approved ? "Disapprove Review" : "Approve Review"}
+                              title={r.approved ? "Disapprove review" : "Approve review"}
                             >
                               {r.approved ? <X className="w-4 h-4" /> : <Check className="w-4 h-4" />}
                             </button>
                             <button
                               onClick={() => handleDeleteReview(r.id)}
-                              className="p-1.5 border border-slate-200 dark:border-slate-800 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors"
+                              className="p-1.5 border border-slate-200 dark:border-slate-800 text-accent-red hover:bg-accent-red/5 rounded-lg transition-colors cursor-pointer"
                               title="Delete Review"
                             >
                               <Trash2 className="w-4.5 h-4.5" />
@@ -812,26 +740,26 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-slate-450 italic text-center py-10 bg-white dark:bg-slate-900 border rounded-2xl">
-                No reviews have been written in the platform yet.
-              </p>
+              <div className="bg-white dark:bg-slate-900 border p-12 text-center rounded-2xl text-slate-400 italic text-xs font-semibold">
+                No submitted student reviews found.
+              </div>
             )}
           </div>
         )}
 
-        {/* Tab 4: Manage Users */}
+        {/* Registered Users Tab */}
         {activeTab === "users" && (
-          <div className="space-y-4">
-            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg border-b border-slate-200 dark:border-slate-800 pb-3">
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <h3 className="font-bold text-slate-855 dark:text-white text-base border-b border-slate-205 dark:border-slate-850 pb-3">
               User Profiles Directory ({users.length})
             </h3>
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm transition-colors duration-300">
+            <div className="border border-slate-200 dark:border-slate-900 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm transition-colors duration-300">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <table className="w-full text-left text-xs font-semibold">
+                  <thead className="bg-slate-50 dark:bg-slate-850/50 border-b border-slate-200 dark:border-slate-855 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                     <tr>
-                      <th className="px-6 py-3">Name</th>
+                      <th className="px-6 py-3">Account Name</th>
                       <th className="px-6 py-3">Email Address</th>
                       <th className="px-6 py-3">Role</th>
                       <th className="px-6 py-3">Target Branch</th>
@@ -839,29 +767,27 @@ export default function AdminDashboard() {
                       <th className="px-6 py-3">Joined Date</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-150 dark:divide-slate-855 text-slate-700 dark:text-slate-350">
+                  <tbody className="divide-y divide-slate-150 dark:divide-slate-855 text-slate-750 dark:text-slate-350">
                     {users.map((u) => (
-                      <tr key={u.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                      <tr key={u.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/10">
                         <td className="px-6 py-4 font-bold">{u.name}</td>
                         <td className="px-6 py-4">{u.email}</td>
                         <td className="px-6 py-4">
                           <span
                             className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded border ${
                               u.role === "ADMIN"
-                                ? "bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/20"
-                                : "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-950/20"
+                                ? "bg-accent-red/10 text-accent-red border-accent-red/20"
+                                : "bg-primary/10 text-primary border-primary/20"
                             }`}
                           >
                             {u.role}
                           </span>
                         </td>
-                        <td className="px-6 py-4 max-w-[150px] truncate">
-                          {u.preferredBranch || "Any"}
-                        </td>
+                        <td className="px-6 py-4 truncate max-w-[150px]">{u.preferredBranch || "Any"}</td>
                         <td className="px-6 py-4 font-bold">
                           {u.budget ? `₹${u.budget.toLocaleString()}/yr` : "Any"}
                         </td>
-                        <td className="px-6 py-4 text-xs text-slate-400 font-medium">
+                        <td className="px-6 py-4 text-slate-400 font-medium">
                           {new Date(u.createdAt).toLocaleDateString()}
                         </td>
                       </tr>

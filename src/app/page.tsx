@@ -1,6 +1,9 @@
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import CollegeCard from "@/components/CollegeCard";
+import LandingHero from "@/components/LandingHero";
+import LandingStats from "@/components/LandingStats";
+import LandingFeatures from "@/components/LandingFeatures";
 import {
   FeesBarChart,
   PlacementsBarChart,
@@ -8,20 +11,7 @@ import {
   DistrictBarChart,
   RatingLineChart,
 } from "@/components/Charts";
-import {
-  GraduationCap,
-  Search,
-  Scale,
-  BarChart3,
-  Bot,
-  Layers,
-  ArrowRight,
-  TrendingUp,
-  MapPin,
-  Trophy,
-  Sparkles,
-} from "lucide-react";
-import SearchRedirector from "@/components/SearchRedirector"; // Simple client redirect component
+import { ArrowRight, BarChart3, Star, Quote, ArrowUpRight } from "lucide-react";
 
 export const revalidate = 0; // Disable server caching for dynamic statistics
 
@@ -46,7 +36,7 @@ export default async function LandingPage() {
     },
   });
 
-  // 1. Avg fees by type
+  // Calculate metrics for stats graphs
   const typeFeesMap: Record<string, { sum: number; count: number }> = {};
   allColleges.forEach((c) => {
     typeFeesMap[c.type] = typeFeesMap[c.type] || { sum: 0, count: 0 };
@@ -58,7 +48,6 @@ export default async function LandingPage() {
     avgFees: Math.round(typeFeesMap[type].sum / typeFeesMap[type].count),
   }));
 
-  // 2. Govt vs Private counts
   const govtPrivateMap: Record<string, number> = {};
   allColleges.forEach((c) => {
     const groupName = c.type.includes("Gov") ? "Govt / Aided" : "Private";
@@ -69,7 +58,6 @@ export default async function LandingPage() {
     value: govtPrivateMap[name],
   }));
 
-  // 3. District-wise distribution
   const districtMap: Record<string, number> = {};
   allColleges.forEach((c) => {
     districtMap[c.district] = (districtMap[c.district] || 0) + 1;
@@ -79,7 +67,6 @@ export default async function LandingPage() {
     count: districtMap[district],
   }));
 
-  // 4. Placements (Top 5)
   const placementsData = allColleges
     .slice(0, 5)
     .map((c) => ({
@@ -88,7 +75,6 @@ export default async function LandingPage() {
       averagePackage: c.averagePackage,
     }));
 
-  // 5. Ratings (Top 6)
   const ratingsData = allColleges
     .slice(0, 6)
     .map((c) => ({
@@ -97,227 +83,183 @@ export default async function LandingPage() {
     }));
 
   return (
-    <div className="space-y-16 pb-20">
+    <div className="space-y-20 pb-20">
       
-      {/* 1. Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 text-white py-20 px-4 sm:px-6 lg:px-8 shadow-inner">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent pointer-events-none" />
-        <div className="max-w-5xl mx-auto text-center space-y-8 relative z-10">
-          
-          <div className="inline-flex items-center space-x-2 bg-white/10 hover:bg-white/15 px-4 py-1.5 rounded-full text-sm font-semibold border border-white/10 transition-colors">
-            <Sparkles className="w-4.5 h-4.5 text-amber-300 animate-spin" />
-            <span>AI-Powered Admissions Assistance for Kerala</span>
-          </div>
+      {/* 1. Interactive Animated Hero Banner */}
+      <LandingHero />
 
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-none">
-            Find the Perfect <span className="underline decoration-wavy decoration-amber-300">Engineering</span> College
-          </h1>
-          <p className="max-w-2xl mx-auto text-base sm:text-xl text-blue-100 font-medium">
-            Search, compare, analyze placement figures, and receive smart AI recommendations to accelerate your academic career in Kerala.
-          </p>
+      {/* 2. Platform Statistics Summary Cards */}
+      <LandingStats stats={{ collegesCount: allColleges.length }} />
 
-          {/* Landing Search Bar */}
-          <div className="max-w-2xl mx-auto">
-            <SearchRedirector />
-          </div>
-
-          {/* Quick CTA Actions */}
-          <div className="flex flex-wrap justify-center gap-4 text-sm font-semibold">
-            <Link
-              href="/predictor"
-              className="px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-900 shadow-lg shadow-amber-500/20 active:scale-95 transition-all"
-            >
-              Predict Admission by Rank
-            </Link>
-            <Link
-              href="/compare"
-              className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/30 text-white backdrop-blur active:scale-95 transition-all"
-            >
-              Compare Colleges
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. Stats Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 rounded-3xl shadow-sm transition-colors">
-          <div className="text-center space-y-1">
-            <GraduationCap className="w-8 h-8 text-blue-500 mx-auto" />
-            <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">{allColleges.length}+</p>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Colleges Indexed</p>
-          </div>
-          <div className="text-center space-y-1 border-l border-slate-100 dark:border-slate-800">
-            <TrendingUp className="w-8 h-8 text-indigo-500 mx-auto" />
-            <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">98%</p>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Top Placement Rate</p>
-          </div>
-          <div className="text-center space-y-1 border-l border-slate-100 dark:border-slate-800">
-            <Trophy className="w-8 h-8 text-emerald-500 mx-auto" />
-            <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">45 LPA</p>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Highest CTC</p>
-          </div>
-          <div className="text-center space-y-1 border-l border-slate-100 dark:border-slate-800">
-            <Bot className="w-8 h-8 text-violet-500 mx-auto" />
-            <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">24/7</p>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">AI Support</p>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Core Features Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="text-center space-y-2">
-          <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">Smart Features</h2>
-          <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto text-sm">
-            Discover resources, comparison insights, and tools specifically designed for KEAM aspirants.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl space-y-3 hover:shadow-md transition-shadow">
-            <Search className="w-10 h-10 text-blue-500 bg-blue-50 dark:bg-blue-950/30 p-2.5 rounded-xl" />
-            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">Advanced Listing</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              Filter by annual tuition budget, district, autonomous status, hostel availability, and transport routes.
-            </p>
-          </div>
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl space-y-3 hover:shadow-md transition-shadow">
-            <Scale className="w-10 h-10 text-indigo-500 bg-indigo-50 dark:bg-indigo-950/30 p-2.5 rounded-xl" />
-            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">Multi-College Compare</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              Select up to four colleges side-by-side to review average packages, academic facilities, and AI assessment scores.
-            </p>
-          </div>
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl space-y-3 hover:shadow-md transition-shadow">
-            <BarChart3 className="w-10 h-10 text-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 p-2.5 rounded-xl" />
-            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">KEAM Predictor</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              Estimate your admission probability and get Dream, Target, and Safety colleges based on your rank.
-            </p>
-          </div>
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl space-y-3 hover:shadow-md transition-shadow">
-            <Bot className="w-10 h-10 text-violet-500 bg-violet-50 dark:bg-violet-950/30 p-2.5 rounded-xl" />
-            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">AI Chat Consultant</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              Receive guidance on engineering paths, roadmap suggestions, and immediate answers regarding fee details.
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* 3. Core SaaS Capabilities Section */}
+      <LandingFeatures />
 
       {/* 4. Featured Colleges Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="flex justify-between items-end border-b border-slate-200 dark:border-slate-800 pb-4">
-          <div className="space-y-1">
-            <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">Featured Colleges</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">
-              Discover top-rated engineering institutions offering world-class programs.
-            </p>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 border-b border-slate-200/80 dark:border-slate-900 pb-5">
+          <div className="space-y-2 text-center sm:text-left">
+            <h2 className="text-2xl font-black text-slate-850 dark:text-white">Featured Top Campuses</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Explore high-ranking institutions based on academic records, locations, and facilities.</p>
           </div>
           <Link
             href="/colleges"
-            className="flex items-center text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline"
+            className="self-center sm:self-end inline-flex items-center text-xs font-bold text-primary hover:text-primary-hover tracking-wider uppercase"
           >
-            Explore all <ArrowRight className="w-4 h-4 ml-1" />
+            Browse all colleges
+            <ArrowRight className="w-4 h-4 ml-1.5" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {colleges.map((college) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {colleges.map((c) => (
             <CollegeCard
-              key={college.id}
-              id={college.id}
-              name={college.name}
-              image={college.image}
-              rating={college.rating}
-              fees={college.fees}
-              placementPercentage={college.placementPercentage}
-              aiScore={college.aiScore}
-              district={college.district}
-              type={college.type}
+              key={c.id}
+              id={c.id}
+              name={c.name}
+              image={c.image}
+              rating={c.rating}
+              fees={c.fees}
+              placementPercentage={c.placementPercentage}
+              aiScore={c.aiScore}
+              district={c.district}
+              type={c.type}
             />
           ))}
         </div>
       </section>
 
-      {/* 5. Analytics Dashboard Charts Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="text-center space-y-2">
-          <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">Platform Analytics</h2>
-          <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto text-sm">
-            Explore overall comparisons of tuition structures, placement rates, and regional allocation ratios.
+      {/* 5. Platform Data Analytics Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        <div className="text-center space-y-2 max-w-2xl mx-auto">
+          <div className="inline-flex items-center space-x-2 bg-primary/10 border border-primary/20 px-3 py-1 rounded-full text-[10px] font-bold text-primary tracking-wider uppercase">
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>Interactive Insights</span>
+          </div>
+          <h2 className="text-2xl font-black text-slate-850 dark:text-white">Data-Driven Campus Insights</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+            Analyze distributions across engineering branches, locations, types, and fee caps to make informed choices.
           </p>
         </div>
 
+        {/* Charts Grids */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
-          {/* Average Fees by Type */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm">Average Annual Fees (INR)</h3>
+          {/* Average Annual Fees */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 p-6 rounded-2xl shadow-sm transition-colors">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-6 uppercase tracking-wider">Average Annual Fees (INR)</h3>
             <FeesBarChart data={avgFeesData} />
           </div>
 
-          {/* Placement Distribution */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm">Placement vs Avg Packages (LPA)</h3>
+          {/* Placement and Salary */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 p-6 rounded-2xl shadow-sm transition-colors">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-6 uppercase tracking-wider">Placements & Salary Packages</h3>
             <PlacementsBarChart data={placementsData} />
           </div>
 
-          {/* District Wise Distribution */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm">College Count by District</h3>
+          {/* District Wise Count */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 p-6 rounded-2xl shadow-sm transition-colors">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-6 uppercase tracking-wider">Colleges by District</h3>
             <DistrictBarChart data={districtData} />
           </div>
 
-          {/* Govt vs Private Allocation */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm">Administrative Allocation</h3>
+          {/* Rating Line */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 p-6 rounded-2xl shadow-sm transition-colors">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-6 uppercase tracking-wider">Top rated academic ratings</h3>
+            <RatingLineChart data={ratingsData} />
+          </div>
+
+        </div>
+
+        {/* Govt vs Private Counts Card */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 p-6 rounded-2xl shadow-sm transition-colors max-w-xl mx-auto">
+          <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-6 uppercase tracking-wider text-center">Institution Type Share</h3>
+          <div className="flex justify-center">
             <TypePieChart data={typePieData} />
+          </div>
+        </div>
+
+      </section>
+
+      {/* 6. Premium Student Reviews Section */}
+      <section className="bg-slate-100/40 dark:bg-slate-900/30 border-y border-slate-200/60 dark:border-slate-900 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          
+          <div className="text-center space-y-2 max-w-2xl mx-auto">
+            <h2 className="text-2xl font-black text-slate-850 dark:text-white">Student Testimonials</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Read about the firsthand campus experiences of engineering students across Kerala.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            {/* Testimonial 1 */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 p-6 rounded-2xl shadow-sm transition-colors space-y-5">
+              <Quote className="w-8 h-8 text-primary/25" />
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                "Finding hostel accommodations and evaluating cutoff ranks was extremely stressful. College Discovery gave me accurate placement information and the exact predicted safe colleges in Thrissur."
+              </p>
+              <div className="flex items-center space-x-3 pt-2">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase">AM</div>
+                <div>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Abhijith M.</p>
+                  <p className="text-[10px] text-slate-400">CET Trivandrum, CSE</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 2 */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 p-6 rounded-2xl shadow-sm transition-colors space-y-5">
+              <Quote className="w-8 h-8 text-primary/25" />
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                "The chatbot admissions assistant guided me through all colleges offering robotics and automation. I could filter options matching my exact parent tuition cap instantly."
+              </p>
+              <div className="flex items-center space-x-3 pt-2">
+                <div className="w-8 h-8 rounded-lg bg-accent-green/10 text-accent-green flex items-center justify-center font-bold text-xs uppercase">SR</div>
+                <div>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Sruthi Rajan</p>
+                  <p className="text-[10px] text-slate-400">MEC Ernakulam, ECE</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 3 */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 p-6 rounded-2xl shadow-sm transition-colors space-y-5">
+              <Quote className="w-8 h-8 text-primary/25" />
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                "Using the comparison matrix to evaluate placement stats and autonomous certifications side-by-side helped me settle on MACE Kothamangalam. Highly recommend this dashboard!"
+              </p>
+              <div className="flex items-center space-x-3 pt-2">
+                <div className="w-8 h-8 rounded-lg bg-accent-purple/10 text-accent-purple flex items-center justify-center font-bold text-xs uppercase">JK</div>
+                <div>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Jithin Krishnan</p>
+                  <p className="text-[10px] text-slate-400">MACE, Mechanical</p>
+                </div>
+              </div>
+            </div>
+
           </div>
 
         </div>
       </section>
 
-      {/* 6. Testimonials Section */}
-      <section className="bg-slate-100 dark:bg-slate-900/50 py-16 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="text-center space-y-2">
-            <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">Student Testimonials</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">
-              Read how College Discovery is helping thousands of students make informed educational decisions.
+      {/* 7. Quick FAQs Section */}
+      <section className="max-w-4xl mx-auto px-4 py-6 space-y-8">
+        <h2 className="text-2xl font-black text-slate-850 dark:text-white text-center">Frequently Asked Questions</h2>
+        <div className="space-y-4">
+          
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 p-6 rounded-2xl shadow-sm transition-colors">
+            <h4 className="font-bold text-slate-850 dark:text-white text-sm">How accurate are the KEAM predictor results?</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-405 leading-relaxed mt-2 font-medium">
+              Chancing predictions are evaluated against historical allotment trends released by the Commissioner for Entrance Examinations (CEE), Kerala. Actual cutoffs fluctuate based on candidate pool branches and seat counts.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-850 shadow-sm space-y-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400 italic">
-                "The KEAM Predictor is extremely accurate! It gave me Government Model Engineering College as a moderate match, and I got allotment there in the first round!"
-              </p>
-              <div>
-                <p className="font-bold text-sm text-slate-800 dark:text-slate-200">Rohit S. Nair</p>
-                <p className="text-xs text-slate-400">B.Tech CSE Student</p>
-              </div>
-            </div>
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-850 shadow-sm space-y-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400 italic">
-                "I was confused between CET and MEC for placements. The Comparison Tool side-by-side table along with the AI ROI analysis gave me clear directions."
-              </p>
-              <div>
-                <p className="font-bold text-sm text-slate-800 dark:text-slate-200">Aditi Krishna</p>
-                <p className="text-xs text-slate-400">Admitted B.Tech 2026</p>
-              </div>
-            </div>
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-850 shadow-sm space-y-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400 italic">
-                "I asked the chatbot for autonomous colleges in Kochi with fee constraints. The answer was prompt, exact, and helped me finalize my application registry."
-              </p>
-              <div>
-                <p className="font-bold text-sm text-slate-800 dark:text-slate-200">Midhun Paul</p>
-                <p className="text-xs text-slate-400">KEAM Rank: 4200</p>
-              </div>
-            </div>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 p-6 rounded-2xl shadow-sm transition-colors">
+            <h4 className="font-bold text-slate-850 dark:text-white text-sm">Are the reviews moderated?</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-405 leading-relaxed mt-2 font-medium">
+              Yes. All reviews submitted by students go through administrative moderation checks in the Admin Dashboard before appearing publicly on institutional profile listings.
+            </p>
           </div>
+
         </div>
       </section>
 

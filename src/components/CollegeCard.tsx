@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Bookmark, BookmarkCheck, Star, IndianRupee, Briefcase, ShieldAlert, Sparkles, MapPin } from "lucide-react";
+import { Bookmark, BookmarkCheck, Star, IndianRupee, Briefcase, Sparkles, MapPin } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 interface CollegeCardProps {
   id: string;
@@ -18,7 +19,7 @@ interface CollegeCardProps {
   district: string;
   type: string;
   isSavedInit?: boolean;
-  onRemoveFromSaved?: (id: string) => void; // Optional callback for updating dashboard list
+  onRemoveFromSaved?: (id: string) => void;
 }
 
 export default function CollegeCard({
@@ -82,96 +83,112 @@ export default function CollegeCard({
   };
 
   return (
-    <Link href={`/colleges/${id}`} className="group block">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full relative">
-        
-        {/* Badges / Top Stats */}
-        <div className="relative h-48 w-full overflow-hidden">
+    <motion.div
+      whileHover={{ y: -6, scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className="h-full"
+    >
+      <Link
+        href={`/colleges/${id}`}
+        className="group block h-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col relative"
+      >
+        {/* Banner Image / Highlights */}
+        <div className="relative h-48 w-full overflow-hidden flex-shrink-0">
           <img
             src={image || "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=800"}
             alt={name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
-          
-          {/* Top Row Badges */}
-          <div className="absolute top-3 left-3 right-3 flex justify-between items-center">
-            <span className="bg-white/95 dark:bg-slate-950/90 text-slate-800 dark:text-slate-100 text-xs font-semibold px-2.5 py-1 rounded-md backdrop-blur shadow-sm">
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent" />
+
+          {/* Type tag & Bookmark action */}
+          <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
+            <span className="bg-white/90 dark:bg-slate-950/80 text-slate-800 dark:text-slate-200 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg backdrop-blur border border-slate-200/30 dark:border-slate-800 shadow-sm">
               {type}
             </span>
             <button
               onClick={toggleSave}
               disabled={saving}
-              className="p-2 rounded-lg bg-white/95 hover:bg-white dark:bg-slate-950/95 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 backdrop-blur shadow-sm transition-all active:scale-95"
+              className="p-2 rounded-xl bg-white/90 hover:bg-white dark:bg-slate-950/80 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-350 hover:text-accent-red dark:hover:text-accent-red backdrop-blur border border-slate-200/30 dark:border-slate-800 shadow-sm transition-all active:scale-95 cursor-pointer"
               title={isSaved ? "Remove from Saved" : "Save College"}
             >
               {isSaved ? (
-                <BookmarkCheck className="w-5 h-5 text-blue-600 dark:text-blue-400 fill-current animate-pulse" />
+                <BookmarkCheck className="w-4 h-4 text-accent-red fill-current" />
               ) : (
-                <Bookmark className="w-5 h-5" />
+                <Bookmark className="w-4 h-4" />
               )}
             </button>
           </div>
 
-          {/* Bottom Overlay Label */}
-          <div className="absolute bottom-3 left-3 flex items-center space-x-1.5 text-white">
-            <MapPin className="w-4 h-4 text-blue-400" />
-            <span className="text-xs font-medium">{district}, Kerala</span>
+          {/* Location Badge */}
+          <div className="absolute bottom-4 left-4 flex items-center space-x-1.5 text-white z-10">
+            <div className="w-5 h-5 rounded-md bg-white/20 backdrop-blur flex items-center justify-center">
+              <MapPin className="w-3 h-3 text-white" />
+            </div>
+            <span className="text-xs font-bold tracking-tight text-white/90">{district}, Kerala</span>
           </div>
         </div>
 
         {/* Card Body */}
-        <div className="p-5 flex-grow flex flex-col justify-between">
+        <div className="p-5 flex-grow flex flex-col justify-between space-y-4">
           <div className="space-y-2">
             
-            {/* Rating / Score Row */}
-            <div className="flex justify-between items-center text-sm">
-              <div className="flex items-center space-x-1 text-amber-500">
+            {/* Top row metrics */}
+            <div className="flex justify-between items-center text-xs">
+              <div className="flex items-center space-x-1.5 text-accent-yellow">
                 <Star className="w-4 h-4 fill-current" />
-                <span className="font-bold text-slate-800 dark:text-slate-200">{rating}</span>
-                <span className="text-slate-400 text-xs">/ 5</span>
+                <span className="font-extrabold text-slate-800 dark:text-slate-200">{rating.toFixed(1)}</span>
+                <span className="text-slate-400 font-medium">/ 5.0</span>
               </div>
-              <div className="flex items-center space-x-1 text-indigo-600 dark:text-indigo-400 font-semibold bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded text-xs border border-indigo-100 dark:border-indigo-900/30">
-                <Sparkles className="w-3 h-3 text-indigo-500" />
-                <span>AI Score: {aiScore}</span>
+              <div className="flex items-center space-x-1.5 text-accent-purple font-bold bg-accent-purple/5 px-2.5 py-1 rounded-lg border border-accent-purple/10">
+                <Sparkles className="w-3 h-3" />
+                <span>Fit Score: {aiScore}</span>
               </div>
             </div>
 
-            {/* Title */}
-            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-1 transition-colors">
+            {/* College Name */}
+            <h3 className="font-bold text-base text-slate-800 dark:text-slate-100 group-hover:text-primary dark:group-hover:text-primary leading-snug line-clamp-2 transition-colors">
               {name}
             </h3>
           </div>
 
-          {/* Grid Stats */}
-          <div className="grid grid-cols-2 gap-4 py-4 border-t border-slate-100 dark:border-slate-800 mt-4 text-sm">
-            <div className="flex items-center space-x-2 text-slate-600 dark:text-slate-400">
-              <IndianRupee className="w-4.5 h-4.5 text-blue-500 flex-shrink-0" />
+          {/* Features specs grids */}
+          <div className="grid grid-cols-2 gap-4 py-3.5 border-t border-slate-100 dark:border-slate-900 text-xs">
+            
+            {/* Fees */}
+            <div className="flex items-center space-x-2 text-slate-650 dark:text-slate-400">
+              <div className="w-7 h-7 bg-primary/10 text-primary border border-primary/20 rounded-lg flex items-center justify-center">
+                <IndianRupee className="w-3.5 h-3.5" />
+              </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold leading-none">Fees</p>
-                <p className="font-bold text-slate-700 dark:text-slate-200 mt-0.5">
-                  ₹{fees >= 1000 ? `${(fees / 1000).toFixed(0)}k` : fees}/yr
+                <p className="text-[9px] uppercase tracking-wider text-slate-400 font-bold leading-none">Annual Fees</p>
+                <p className="font-extrabold text-slate-700 dark:text-slate-200 mt-1">
+                  ₹{fees >= 100000 ? `${(fees / 100000).toFixed(2)}L` : `${(fees / 1000).toFixed(0)}k`}
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2 text-slate-600 dark:text-slate-400">
-              <Briefcase className="w-4.5 h-4.5 text-blue-500 flex-shrink-0" />
+
+            {/* Placements */}
+            <div className="flex items-center space-x-2 text-slate-650 dark:text-slate-400">
+              <div className="w-7 h-7 bg-accent-green/10 text-accent-green border border-accent-green/20 rounded-lg flex items-center justify-center">
+                <Briefcase className="w-3.5 h-3.5" />
+              </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold leading-none">Placements</p>
-                <p className="font-bold text-slate-700 dark:text-slate-200 mt-0.5">{placementPercentage}%</p>
+                <p className="text-[9px] uppercase tracking-wider text-slate-400 font-bold leading-none">Placements</p>
+                <p className="font-extrabold text-slate-700 dark:text-slate-200 mt-1">{placementPercentage}%</p>
               </div>
             </div>
+
           </div>
 
-          {/* Footer Action */}
-          <div className="pt-2 flex justify-between items-center text-xs text-blue-600 dark:text-blue-400 font-semibold group-hover:translate-x-1.5 transition-transform duration-300">
-            <span>View details & reviews</span>
+          {/* Explore action */}
+          <div className="pt-1.5 border-t border-slate-100 dark:border-slate-900 flex justify-between items-center text-[10px] text-primary dark:text-primary font-bold uppercase tracking-widest group-hover:translate-x-1 transition-transform">
+            <span>Explore Campus</span>
             <span>→</span>
           </div>
 
         </div>
-
-      </div>
-    </Link>
+      </Link>
+    </motion.div>
   );
 }
